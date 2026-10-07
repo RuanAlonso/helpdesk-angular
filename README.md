@@ -3,7 +3,7 @@
 Painel de chamados de suporte (service desk) feito com **Angular 20**, **TypeScript** e **SCSS**.
 Pensado a partir da rotina real de suporte e sustentação de sistemas: fila priorizada, SLA, histórico de atendimento.
 
-> Demo: _adicione aqui o link do GitHub Pages depois do deploy_
+> Demo: _http://localhost:4200_
 
 ## Funcionalidades
 
