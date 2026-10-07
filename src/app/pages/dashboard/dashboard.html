@@ -1,0 +1,96 @@
+<h1>Fila de hoje</h1>
+
+@if (erro()) {
+  <p class="aviso aviso--erro" role="alert">{{ erro() }}</p>
+} @else if (carregando()) {
+  <p class="vazio">Carregando chamados…</p>
+} @else {
+  <section class="bloco" aria-labelledby="titulo-vencidos">
+    <h2 id="titulo-vencidos">
+      SLA vencido
+      <span class="contador" [class.contador--alerta]="vencidos().length > 0">{{ vencidos().length }}</span>
+    </h2>
+
+    @if (vencidos().length === 0) {
+      <p class="vazio">Nenhum chamado fora do prazo. A fila está em dia.</p>
+    } @else {
+      <ul class="lista-fila">
+        @for (t of vencidos(); track t.id) {
+          <li class="fila-item" [attr.data-prioridade]="t.prioridade">
+            <a [routerLink]="['/chamados', t.id]">
+              <span class="fila-item__titulo">#{{ t.id }} {{ t.titulo }}</span>
+              <span class="fila-item__meta">
+                {{ t.solicitante }} · {{ t.categoria }}
+              </span>
+            </a>
+            <span class="fila-item__atraso">{{ atrasoEmHoras(t) }} h de atraso</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="bloco" aria-labelledby="titulo-situacao">
+    <h2 id="titulo-situacao">Situação da fila</h2>
+    @if (total() === 0) {
+      <p class="vazio">
+        Não há chamados cadastrados.
+        <a routerLink="/chamados/novo">Abra o primeiro chamado</a> ou
+        <button type="button" class="link" (click)="restaurar()">restaure os exemplos</button>.
+      </p>
+    } @else {
+      <div class="barra" role="img" [attr.aria-label]="total() + ' chamados no total, divididos por status'">
+        @for (item of porStatus(); track item.status) {
+          @if (item.qtd > 0) {
+            <span class="barra__trecho" [attr.data-status]="item.status" [style.flex-grow]="item.qtd"></span>
+          }
+        }
+      </div>
+      <ul class="legenda">
+        @for (item of porStatus(); track item.status) {
+          <li>
+            <span class="ponto" [attr.data-status]="item.status"></span>
+            {{ item.rotulo }}: <strong>{{ item.qtd }}</strong>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <div class="duas-colunas">
+    <section class="bloco" aria-labelledby="titulo-prioridade">
+      <h2 id="titulo-prioridade">Em aberto por prioridade</h2>
+      <ul class="prioridades">
+        @for (p of porPrioridade(); track p.prioridade) {
+          <li>
+            <span class="prioridades__rotulo">{{ p.rotulo }}</span>
+            <span class="prioridades__trilho">
+              <span
+                class="prioridades__valor"
+                [attr.data-prioridade]="p.prioridade"
+                [style.width.%]="(p.qtd / maiorPrioridadeQtd()) * 100"
+              ></span>
+            </span>
+            <span class="prioridades__qtd">{{ p.qtd }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="bloco" aria-labelledby="titulo-recentes">
+      <h2 id="titulo-recentes">Atualizados recentemente</h2>
+      @if (recentes().length === 0) {
+        <p class="vazio">Sem atividade ainda.</p>
+      } @else {
+        <ul class="recentes">
+          @for (t of recentes(); track t.id) {
+            <li>
+              <a [routerLink]="['/chamados', t.id]">#{{ t.id }} {{ t.titulo }}</a>
+              <span class="recentes__quando">{{ t.atualizadoEm | date: 'dd/MM HH:mm' }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+}

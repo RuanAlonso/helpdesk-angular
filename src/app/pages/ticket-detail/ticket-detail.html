@@ -1,0 +1,70 @@
+<a class="voltar" routerLink="/chamados">Voltar para chamados</a>
+
+@if (carregando()) {
+  <p class="vazio">Carregando chamado…</p>
+} @else if (!ticket()) {
+  <h1>Chamado não encontrado</h1>
+  <p class="vazio">O chamado #{{ id() }} não existe ou foi excluído. <a routerLink="/chamados">Ver todos os chamados</a></p>
+} @else {
+  @let t = ticket()!;
+  <header class="detalhe-topo" [attr.data-prioridade]="t.prioridade">
+    <h1>#{{ t.id }} {{ t.titulo }}</h1>
+    <div class="acoes">
+      <a class="btn" [routerLink]="['/chamados', t.id, 'editar']">Editar</a>
+      <button type="button" class="btn btn--perigo" (click)="excluir()">Excluir</button>
+    </div>
+  </header>
+
+  <div class="detalhe-grade">
+    <section class="bloco">
+      <h2>Descrição</h2>
+      <p class="texto-corrido">{{ t.descricao }}</p>
+
+      <h2>Histórico</h2>
+      @if (t.comentarios.length === 0) {
+        <p class="vazio">Nenhum comentário ainda. Registre o que foi feito neste chamado.</p>
+      } @else {
+        <ol class="comentarios">
+          @for (c of t.comentarios; track c.data) {
+            <li>
+              <p class="comentarios__autor">{{ c.autor }} <time>{{ c.data | date: "dd/MM 'às' HH:mm" }}</time></p>
+              <p>{{ c.texto }}</p>
+            </li>
+          }
+        </ol>
+      }
+
+      <div class="campo">
+        <label for="novo-comentario">Novo comentário</label>
+        <textarea id="novo-comentario" rows="3" [formControl]="comentario"></textarea>
+        @if (comentario.touched && comentario.invalid) {
+          <span class="erro">Escreva ao menos 3 caracteres.</span>
+        }
+      </div>
+      <button type="button" class="btn btn--primary" (click)="enviarComentario()">Adicionar comentário</button>
+    </section>
+
+    <aside class="bloco">
+      <h2>Detalhes</h2>
+      <div class="campo">
+        <label for="status">Status</label>
+        <select id="status" [value]="t.status" (change)="mudarStatus($event)">
+          @for (s of STATUS_LIST; track s) {
+            <option [value]="s" [selected]="s === t.status">{{ STATUS_LABEL[s] }}</option>
+          }
+        </select>
+      </div>
+      <dl class="meta">
+        <dt>Prioridade</dt><dd>{{ PRIORIDADE_LABEL[t.prioridade] }}</dd>
+        <dt>Categoria</dt><dd>{{ t.categoria }}</dd>
+        <dt>Solicitante</dt><dd>{{ t.solicitante }}</dd>
+        <dt>Responsável</dt><dd>{{ t.responsavel || 'Sem responsável' }}</dd>
+        <dt>Aberto em</dt><dd>{{ t.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</dd>
+        <dt>Prazo (SLA de {{ t.slaHoras }} h)</dt>
+        <dd [class.texto-alerta]="vencido()">
+          {{ prazo() | date: 'dd/MM/yyyy HH:mm' }}@if (vencido()) { — vencido }
+        </dd>
+      </dl>
+    </aside>
+  </div>
+}

@@ -1,0 +1,81 @@
+<h1>Chamados</h1>
+
+<div class="filtros" role="search">
+  <label class="campo">
+    <span>Buscar</span>
+    <input type="search" placeholder="Título, solicitante ou número" [value]="busca()" (input)="busca.set(valor($event))" />
+  </label>
+
+  <label class="campo">
+    <span>Status</span>
+    <select [value]="filtroStatus()" (change)="filtroStatus.set($any(valor($event)))">
+      <option value="">Todos</option>
+      @for (s of STATUS_LIST; track s) {
+        <option [value]="s">{{ STATUS_LABEL[s] }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="campo">
+    <span>Prioridade</span>
+    <select [value]="filtroPrioridade()" (change)="filtroPrioridade.set($any(valor($event)))">
+      <option value="">Todas</option>
+      @for (p of PRIORIDADE_LIST; track p) {
+        <option [value]="p">{{ PRIORIDADE_LABEL[p] }}</option>
+      }
+    </select>
+  </label>
+
+  @if (temFiltro()) {
+    <button type="button" class="btn" (click)="limpar()">Limpar filtros</button>
+  }
+</div>
+
+<p class="resumo" aria-live="polite">{{ filtrados().length }} chamado(s) encontrado(s)</p>
+
+@if (carregando()) {
+  <p class="vazio">Carregando chamados…</p>
+} @else if (filtrados().length === 0) {
+  <p class="vazio">
+    Nenhum chamado corresponde aos filtros.
+    @if (temFiltro()) {
+      <button type="button" class="link" (click)="limpar()">Limpar filtros</button>
+    }
+  </p>
+} @else {
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th scope="col">Nº</th>
+          <th scope="col">Título</th>
+          <th scope="col">Status</th>
+          <th scope="col">Prioridade</th>
+          <th scope="col">Prazo (SLA)</th>
+          <th scope="col">Atualizado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of filtrados(); track t.id) {
+          <tr [attr.data-prioridade]="t.prioridade">
+            <td>{{ t.id }}</td>
+            <td>
+              <a [routerLink]="['/chamados', t.id]">{{ t.titulo }}</a>
+              <small>{{ t.solicitante }} · {{ t.categoria }}</small>
+            </td>
+            <td><span class="ponto" [attr.data-status]="t.status"></span>{{ STATUS_LABEL[t.status] }}</td>
+            <td>{{ PRIORIDADE_LABEL[t.prioridade] }}</td>
+            <td>
+              @if (vencido(t)) {
+                <strong class="texto-alerta">Vencido</strong>
+              } @else {
+                {{ prazo(t) | date: 'dd/MM HH:mm' }}
+              }
+            </td>
+            <td>{{ t.atualizadoEm | date: 'dd/MM HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

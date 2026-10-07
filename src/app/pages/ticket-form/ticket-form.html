@@ -1,0 +1,79 @@
+<a class="voltar" routerLink="/chamados">Voltar para chamados</a>
+<h1>{{ editando() ? 'Editar chamado' : 'Novo chamado' }}</h1>
+
+@if (editando() && carregando()) {
+  <p class="vazio">Carregando chamado…</p>
+} @else if (editando() && !ticket()) {
+  <p class="vazio">Esse chamado não existe. <a routerLink="/chamados">Ver todos os chamados</a></p>
+} @else {
+  <form class="formulario" [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+    <div class="campo campo--larga">
+      <label for="titulo">Título</label>
+      <input id="titulo" type="text" formControlName="titulo" [attr.aria-invalid]="invalido('titulo')" />
+      @if (invalido('titulo')) {
+        <span class="erro">Informe um título de 5 a 80 caracteres.</span>
+      }
+    </div>
+
+    <div class="campo campo--larga">
+      <label for="descricao">Descrição</label>
+      <textarea id="descricao" rows="5" formControlName="descricao" [attr.aria-invalid]="invalido('descricao')"></textarea>
+      @if (invalido('descricao')) {
+        <span class="erro">Descreva o problema com pelo menos 10 caracteres.</span>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="solicitante">Solicitante</label>
+      <input id="solicitante" type="text" formControlName="solicitante" [attr.aria-invalid]="invalido('solicitante')" />
+      @if (invalido('solicitante')) {
+        <span class="erro">Informe quem abriu o chamado.</span>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="responsavel">Responsável (opcional)</label>
+      <input id="responsavel" type="text" formControlName="responsavel" />
+    </div>
+
+    <div class="campo">
+      <label for="categoria">Categoria</label>
+      <select id="categoria" formControlName="categoria">
+        @for (c of CATEGORIAS; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="prioridade">Prioridade</label>
+      <select id="prioridade" formControlName="prioridade">
+        @for (p of PRIORIDADE_LIST; track p) {
+          <option [value]="p">{{ PRIORIDADE_LABEL[p] }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="status">Status</label>
+      <select id="status" formControlName="status">
+        @for (s of STATUS_LIST; track s) {
+          <option [value]="s">{{ STATUS_LABEL[s] }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="sla">Prazo de SLA (horas)</label>
+      <input id="sla" type="number" formControlName="slaHoras" [attr.aria-invalid]="invalido('slaHoras')" />
+      @if (invalido('slaHoras')) {
+        <span class="erro">Use um valor entre 1 e 720 horas.</span>
+      }
+    </div>
+
+    <div class="formulario__acoes campo--larga">
+      <button type="submit" class="btn btn--primary">{{ editando() ? 'Salvar alterações' : 'Abrir chamado' }}</button>
+      <a class="btn" routerLink="/chamados">Cancelar</a>
+    </div>
+  </form>
+}
